@@ -50,8 +50,8 @@ module AeEasy
       end
 
       def add_errored_item(data_hash, field_to_validate, validation)
-        errored_item[:data] = data_hash if errored_item[:data].nil?
         errored_item[:failures].push({ field_to_validate.to_sym => validation })
+        errored_item[:data] = data_hash if errored_item[:data].nil?
       end
 
       def reset_errored_item

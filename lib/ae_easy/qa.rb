@@ -2,7 +2,7 @@ require 'ae_easy/qa/version'
 require 'ae_easy/qa/validate_rules'
 require 'ae_easy/qa/validate_type'
 require 'ae_easy/qa/validate_value'
-require 'answersengine'
+require 'time'
 
 module AeEasy
   module Qa
@@ -24,14 +24,6 @@ module AeEasy
           puts "An error has occurred: #{e}"
           return nil
         end
-      end
-
-      def add_validation(method)
-        instance_eval(&method)
-      end
-
-      def fail_validation
-        self.errors[@name.to_sym] = 'fail'
       end
 
       private

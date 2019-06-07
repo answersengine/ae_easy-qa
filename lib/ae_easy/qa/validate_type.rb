@@ -1,7 +1,7 @@
 module AeEasy
   module Qa
-    class ValidateType < ValidateRules
-      attr_reader :data_hash, :field_to_validate, :desired_type, :rules
+    class ValidateType
+      attr_reader :data_hash, :field_to_validate, :desired_type, :rules, :errored_item
 
       def initialize(data_hash, field_to_validate, desired_type, rules, errored_item)
         @data_hash = data_hash
@@ -22,9 +22,9 @@ module AeEasy
         when 'String'
           add_errored_item(data_hash, field_to_validate, 'type') if data_hash[field_to_validate].class != String
         when 'Integer'
-          add_errored_item(data_hash, field_to_validate, 'type') unless data_hash[field_to_validate].class == Fixnum || data_hash[field_to_validate].to_s =~ /\A\d+(\.\d+)?\z/
+          add_errored_item(data_hash, field_to_validate, 'type') unless data_hash[field_to_validate].class == Fixnum || data_hash[field_to_validate].to_s.strip =~ /\A\d+(\.\d+)?\z/
         when 'Float'
-          add_errored_item(data_hash, field_to_validate, 'type') unless data_hash[field_to_validate].class == Float || data_hash[field_to_validate].to_s =~ /\A\d+(\.\d+)?\z/
+          add_errored_item(data_hash, field_to_validate, 'type') unless data_hash[field_to_validate].class == Float || data_hash[field_to_validate].to_s.strip =~ /\A\d+(\.\d+)?\z/
         when 'Date'
           validate_date_type
         when 'Url'
@@ -48,6 +48,11 @@ module AeEasy
             raise StandardError.new(e.to_s)
           end
         end
+      end
+
+      def add_errored_item(data_hash, field_to_validate, validation)
+        errored_item[:failures].push({ field_to_validate.to_sym => validation })
+        errored_item[:data] = data_hash if errored_item[:data].nil?
       end
 
       def unknown_type_error(desired_type)

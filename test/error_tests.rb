@@ -21,7 +21,7 @@ describe AeEasy::Qa::Validate do
     it 'should test missing date format' do
       data = [{'created_at' => '3/28/2018 10:12'}, {'created_at' => '3/28/2018'}]
       qa = AeEasy::Qa::Validate.new(data)
-      qa.rules = {"individual_validations"=>{"created_at"=>{"type"=>"Date"}}}
+      qa.rules = {"individual_validations"=>{"created_at"=>{"type"=>"Date", "required"=>true}}}
       results = qa.run
       assert_nil results
     end

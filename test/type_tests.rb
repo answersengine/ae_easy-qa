@@ -11,7 +11,7 @@ describe AeEasy::Qa::Validate do
     end
 
     it 'should test integer type validation' do
-      data = [{'rank' => 1}, {'rank' => 'test'}]
+      data = [{'rank' => '1'}, {'rank' => '1 '}, {'rank' => 1}, {'rank' => 'test'}, ]
       qa = AeEasy::Qa::Validate.new(data)
       qa.rules = {"individual_validations"=>{"rank"=>{"type"=>"Integer", "required"=>true}}}
       results = qa.run
