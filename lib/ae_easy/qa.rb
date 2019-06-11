@@ -1,3 +1,4 @@
+require 'ae_easy/qa/helpers'
 require 'ae_easy/qa/version'
 require 'ae_easy/qa/validate_rules'
 require 'ae_easy/qa/validate_type'

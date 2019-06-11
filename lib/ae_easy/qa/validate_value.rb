@@ -1,6 +1,8 @@
 module AeEasy
   module Qa
     class ValidateValue
+      include Helpers
+
       attr_reader :data_hash, :field_to_validate, :params, :errored_item
 
       def initialize(data_hash, field_to_validate, params, errored_item)
@@ -68,11 +70,6 @@ module AeEasy
 
       def or_vals
         params['equal']['or']
-      end
-
-      def add_errored_item(data_hash, field_to_validate, validation)
-        errored_item[:failures].push({ field_to_validate.to_sym => validation })
-        errored_item[:data] = data_hash if errored_item[:data].nil?
       end
 
       def unknown_value_error

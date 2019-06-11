@@ -1,6 +1,8 @@
 module AeEasy
   module Qa
     class ValidateRules
+      include Helpers
+
       attr_reader :data, :errors, :rules
       attr_accessor :errored_item
 
@@ -47,11 +49,6 @@ module AeEasy
 
       def validate_length(data_hash, field_to_validate, length)
         add_errored_item(data_hash, field_to_validate, 'length') if data_hash[field_to_validate].to_s.length != length
-      end
-
-      def add_errored_item(data_hash, field_to_validate, validation)
-        errored_item[:failures].push({ field_to_validate.to_sym => validation })
-        errored_item[:data] = data_hash if errored_item[:data].nil?
       end
 
       def reset_errored_item
