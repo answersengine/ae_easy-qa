@@ -9,7 +9,7 @@ module AeEasy
       def initialize(data, errors, rules)
         @data = data
         @errors = errors
-        @rules = rules['individual_validations']
+        @rules = rules
       end
 
       def run
@@ -22,29 +22,38 @@ module AeEasy
         data.each do |data_hash|
           reset_errored_item
           rules.each{|field_to_validate, options|
-            options.each{|validation, value|
-              case validation
-              when 'required'
-                required_check(data_hash, field_to_validate) if value == true
-              when 'type'
-                ValidateType.new(data_hash, field_to_validate, value, rules, errored_item).run if options['required']
-              when 'value'
-                ValidateValue.new(data_hash, field_to_validate, value, errored_item).run if options['required']
-              when 'length'
-                validate_length(data_hash, field_to_validate, value) if options['required']
-              else
-                unknown_validation_error(validation) if validation !~ /format/
-              end
-            }
+            if passes_required_check?(options, data_hash, field_to_validate)
+              options.each{|validation, value|
+                case validation
+                when 'type'
+                  ValidateType.new(data_hash, field_to_validate, value, rules, errored_item).run if options['required']
+                when 'value'
+                  ValidateValue.new(data_hash, field_to_validate, value, errored_item).run if options['required']
+                when 'length'
+                  validate_length(data_hash, field_to_validate, value) if options['required']
+                when 'required'
+                  nil
+                else
+                  unknown_validation_error(validation) if validation !~ /format/
+                end
+              }
+            end
           }
           errors[:errored_items].push(errored_item) if errored_item && !errored_item[:failures].empty?
         end
       end
 
-      def required_check(data_hash, field_to_validate)
-        if data_hash[field_to_validate].nil? || (data_hash[field_to_validate].class == String && data_hash[field_to_validate].empty?)
+      def passes_required_check?(options, data_hash, field_to_validate)
+        if options['required'] == true && fails_required_check?(data_hash, field_to_validate)
           add_errored_item(data_hash, field_to_validate, 'required')
+          false
+        else
+          true
         end
+      end
+
+      def fails_required_check?(data_hash, field_to_validate)
+        data_hash[field_to_validate].nil? || (data_hash[field_to_validate].class == String && data_hash[field_to_validate].empty?)
       end
 
       def validate_length(data_hash, field_to_validate, length)

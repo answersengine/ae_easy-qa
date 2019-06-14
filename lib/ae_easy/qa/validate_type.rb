@@ -24,9 +24,9 @@ module AeEasy
         when 'String'
           add_errored_item(data_hash, field_to_validate, 'type') if data_hash[field_to_validate].class != String
         when 'Integer'
-          add_errored_item(data_hash, field_to_validate, 'type') unless data_hash[field_to_validate].class == Fixnum || data_hash[field_to_validate].to_s.strip =~ /\A\d+(\.\d+)?\z/
+          add_errored_item(data_hash, field_to_validate, 'type') unless data_hash[field_to_validate].class == Fixnum || data_hash[field_to_validate].to_s.strip =~ /\A\d+(\,\d+)?(\.\d+)?\z/
         when 'Float'
-          add_errored_item(data_hash, field_to_validate, 'type') unless data_hash[field_to_validate].class == Float || data_hash[field_to_validate].to_s.strip =~ /\A\d+(\.\d+)?\z/
+          add_errored_item(data_hash, field_to_validate, 'type') unless data_hash[field_to_validate].class == Float || data_hash[field_to_validate].to_s.strip =~ /\A\d+(\,\d+)?(\.\d+)?\z/
         when 'Date'
           validate_date_type
         when 'Url'
