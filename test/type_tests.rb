@@ -19,11 +19,20 @@ describe AeEasy::Qa::Validator do
     end
 
     it 'should test integer type validation' do
-      data = [{'rank' => '1'}, {'rank' => '1 '}, {'rank' => 1}, {'rank' => 'test'},
-              {'rank' => '1,500'}, {'rank' => '500.04'}, {'rank' => '1,500.04'},
-              {'rank' => '1/5'}]
+      data = [{'rank' => '1'}, {'rank' => '1 '}, {'rank' => 1}, {'rank' => 'test'}, {'rank' => '1/5'}]
       qa = AeEasy::Qa::Validator.new(data)
       qa.config = {"individual_validations"=>{"rank"=>{"type"=>"Integer", "required"=>true}}}
+      results = qa.validate_external
+      assert_equal results, {:errored_items=>[{:failures=>[{:rank_type=>"fail"}], :item=>{"rank"=>"test"}},
+                                              {:failures=>[{:rank_type=>"fail"}], :item=>{"rank"=>"1/5"}}]}
+    end
+
+    it 'should test float type validation' do
+      data = [{'rank' => '1'}, {'rank' => '1 '}, {'rank' => 1}, {'rank' => 'test'},
+              {'rank' => '1,500'}, {'rank' => '.04'}, {'rank' => '500.04'}, {'rank' => '1,500.04'},
+              {'rank' => '1/5'}]
+      qa = AeEasy::Qa::Validator.new(data)
+      qa.config = {"individual_validations"=>{"rank"=>{"type"=>"Float", "required"=>true}}}
       results = qa.validate_external
       assert_equal results, {:errored_items=>[{:failures=>[{:rank_type=>"fail"}], :item=>{"rank"=>"test"}},
                                               {:failures=>[{:rank_type=>"fail"}], :item=>{"rank"=>"1/5"}}]}
