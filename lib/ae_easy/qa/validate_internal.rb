@@ -1,17 +1,18 @@
 module AeEasy
   module Qa
     class ValidateInternal
-      attr_reader :scrapers, :rules
+      attr_reader :scrapers, :rules, :outputs
 
-      def initialize(config)
+      def initialize(config, outputs)
         @scrapers = config['scrapers']
         @rules = config['individual_validations']
+        @outputs = outputs
       end
 
       def run
         begin
           scrapers.each do |scraper_name, collections|
-            ValidateScraper.new(scraper_name, collections, rules).run
+            ValidateScraper.new(scraper_name, collections, rules, outputs).run
           end
         rescue StandardError => e
           puts "An error has occurred: #{e}"
@@ -21,17 +22,18 @@ module AeEasy
     end
 
     class ValidateScraper
-      attr_reader :scraper_name, :collections, :rules
+      attr_reader :scraper_name, :collections, :rules, :outputs
 
-      def initialize(scraper_name, collections, rules)
+      def initialize(scraper_name, collections, rules, outputs)
         @scraper_name = scraper_name
         @collections = collections
         @rules = rules
+        @outputs = outputs
       end
 
       def run
         collections.each do |collection_name|
-          ValidateCollection.new(scraper_name, collection_name, total_records(collection_name), rules).run
+          ValidateCollection.new(scraper_name, collection_name, total_records(collection_name), rules, outputs).run
         end
       end
 
@@ -47,29 +49,27 @@ module AeEasy
     end
 
     class ValidateCollection
-      attr_reader :scraper_name, :collection_name, :total_records, :rules, :errors
+      attr_reader :scraper_name, :collection_name, :total_records, :rules, :errors, :outputs
 
-      def initialize(scraper_name, collection_name, total_records, rules)
+      def initialize(scraper_name, collection_name, total_records, rules, outputs)
         @scraper_name = scraper_name
         @collection_name = collection_name
         @total_records = total_records
         @rules = rules
+        @outputs = outputs
         @errors = { errored_items: [] }
       end
 
       def run
         ValidateGroups.new(data, errors).run
-        #could create the errors hash inside ValidateRules?
-        #errors = ValidateRules.new(data, config).run
         ValidateRules.new(data, errors, rules).run
-        #should have a class that saves the output and the summary output
-        #SaveOutput.new(errors, output_collection_name).run
+        SaveOutput.new(errors, outputs_collection_name, outputs).run
       end
 
       private
 
-      def output_collection_name
-        @output_collection_name ||= "#{scraper_name}_#{collection_name}"
+      def outputs_collection_name
+        @outputs_collection_name ||= "#{scraper_name}_#{collection_name}"
       end
 
       def data
@@ -86,7 +86,6 @@ module AeEasy
                     data
                   end
       end
-
     end
   end
 end

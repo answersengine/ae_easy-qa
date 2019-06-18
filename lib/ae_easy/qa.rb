@@ -6,6 +6,7 @@ require 'ae_easy/qa/validate_rules'
 require 'ae_easy/qa/validate_type'
 require 'ae_easy/qa/validate_value'
 require 'ae_easy/qa/validate_groups'
+require 'ae_easy/qa/save_output'
 require 'answersengine'
 require 'time'
 
@@ -18,15 +19,14 @@ module AeEasy
       def initialize(data=nil, options={})
         load_config
         @data = data
-        @errors = { errored_items: [] }
       end
 
-      def validate_internal
-        ValidateInternal.new(config).run
+      def validate_internal(outputs)
+        ValidateInternal.new(config, outputs).run
       end
 
-      def validate_external
-        ValidateExternal.new(data, errors, config).run
+      def validate_external(outputs, collection_name)
+        ValidateExternal.new(data, config, outputs, collection_name).run
       end
 
       private
