@@ -32,12 +32,29 @@ module AeEasy
       end
 
       def run
+        if status_ok?
+          validate_collections
+        else
+          output_response
+          return nil
+        end
+      end
+
+      private
+
+      def status_ok?
+        collection_counts.code == 200
+      end
+
+      def validate_collections
         collections.each do |collection_name|
           ValidateCollection.new(scraper_name, collection_name, total_records(collection_name), rules, outputs).run
         end
       end
 
-      private
+      def output_response
+        puts collection_counts.parsed_response['message']
+      end
 
       def total_records(collection_name)
         collection_counts.find{|collection_hash| collection_hash['collection'] == collection_name }['count']
