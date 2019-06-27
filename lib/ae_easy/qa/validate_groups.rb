@@ -1,10 +1,11 @@
 module AeEasy
   module Qa
     class ValidateGroups
-      attr_reader :data, :errors
+      attr_reader :data, :collection_name, :errors
 
-      def initialize(data, errors)
+      def initialize(data, collection_name, errors)
         @data = data
+        @collection_name = collection_name
         @errors = errors
       end
 

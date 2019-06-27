@@ -13,7 +13,7 @@ module AeEasy
 
       def run
         begin
-          ValidateGroups.new(data, errors).run
+          ValidateGroups.new(data, collection_name, errors).run
           ValidateRules.new(data, errors, config['individual_validations']).run if config
           SaveOutput.new(errors, collection_name, outputs).run
           return errors

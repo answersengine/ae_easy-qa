@@ -78,7 +78,7 @@ module AeEasy
       end
 
       def run
-        ValidateGroups.new(data, errors).run
+        ValidateGroups.new(data, collection_name, errors).run
         ValidateRules.new(data, errors, rules).run
         SaveOutput.new(errors, outputs_collection_name, outputs).run
       end

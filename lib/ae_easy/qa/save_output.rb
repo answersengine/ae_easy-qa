@@ -19,9 +19,11 @@ module AeEasy
       private
 
       def save_group_errors
-        errors.each{|error_name, value|
+        errors.each{|error_name, output_hash|
           if error_name != :errored_items
-            outputs << { error_name => 'fail', '_collection' => collection_name }
+            output_hash['_collection'] = collection_name
+            outputs << output_hash
+            error_name = output_hash[:failure]
             summary[error_name] += 1
           end
         }
