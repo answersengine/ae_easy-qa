@@ -78,13 +78,10 @@ module AeEasy
       end
 
       def save_summary
-        if summary.any?
-          outputs << summary
-        else
-          summary['pass'] = 'true'
-        end
         summary['_collection'] = "#{collection_name}_summary"
         summary['total_items'] = total_items
+        summary['pass'] = 'true' if summary.empty?
+        outputs << summary
       end
 
       def extract_field(field_sym)
