@@ -13,8 +13,10 @@ module AeEasy
 
       def run
         begin
-          ValidateGroups.new(data, collection_name, errors).run
-          ValidateRules.new(data, errors, rules).run if rules
+          if data.any?
+            ValidateGroups.new(data, collection_name, errors).run
+            ValidateRules.new(data, errors, rules).run if rules
+          end
           SaveOutput.new(data.count, rules, errors, collection_name, outputs).run
           return errors
         rescue StandardError => e

@@ -78,9 +78,9 @@ module AeEasy
       end
 
       def save_summary
+        summary['pass'] = 'true' if summary.empty?
         summary['_collection'] = "#{collection_name}_summary"
         summary['total_items'] = total_items
-        summary['pass'] = 'true' if summary.empty?
         outputs << summary
       end
 
