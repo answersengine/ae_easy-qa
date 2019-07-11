@@ -31,7 +31,7 @@ module AeEasy
                   ValidateValue.new(data_hash, field_to_validate, value, errored_item).run if options['required']
                 when 'length'
                   validate_length(data_hash, field_to_validate, value) if options['required']
-                when 'required'
+                when /required|threshold/
                   nil
                 else
                   unknown_validation_error(validation) if validation !~ /format/
