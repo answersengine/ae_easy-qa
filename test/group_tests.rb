@@ -7,7 +7,7 @@ describe AeEasy::Qa::Validate do
         qa.errors[:rank_val] = 'fail' if data.find{|hash| hash['rank'] > 5 }
       end
       data = [{'rank' => 1}, {'rank' => 3}, {'rank' => 2}, {'rank' => 6}]
-      qa = AeEasy::Qa::Validate.new(data)
+      qa = AeEasy::Qa::Validator.new(data)
       test_val.call(qa, data)
       results = qa.run
       assert_equal results, {:errored_items=>[], :rank_val=>"fail"}

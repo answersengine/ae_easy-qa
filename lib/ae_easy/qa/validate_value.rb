@@ -38,8 +38,10 @@ module AeEasy
           if equal_with_operators?
             equal_with_operators
           else
-            add_errored_item(data_hash, field_to_validate, 'value') if(data_hash[field_to_validate] != params['equal'])
+            add_errored_item(data_hash, field_to_validate, 'value') if (data_hash[field_to_validate] != params['equal'])
           end
+        elsif params['regex']
+          add_errored_item(data_hash, field_to_validate, 'value') if (data_hash[field_to_validate].to_s !~ Regexp.new(params['regex']))
         elsif params['less_than']
           add_errored_item(data_hash, field_to_validate, 'value') if !(data_hash[field_to_validate] < params['less_than'])
         elsif params['greater_than']
