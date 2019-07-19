@@ -61,7 +61,7 @@ module AeEasy
       end
 
       def reset_errored_item
-        self.errored_item = { failures: [] }
+        self.errored_item = { failures: {} }
       end
 
       def unknown_validation_error(validation)

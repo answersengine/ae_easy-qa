@@ -29,8 +29,8 @@ module AeEasy
         rules.each{|field_to_validate, options|
           if options['threshold']
             error_total = errors[:errored_items].inject(0){|total, errored_item|
-              failed_fields = errored_item[:failures].collect{|failure|
-                extract_field(failure.keys.first)
+              failed_fields = errored_item[:failures].keys.collect{|failure_key|
+                extract_field(failure_key)
               }.uniq
               total + 1 if failed_fields.include?(field_to_validate)
             }
@@ -61,8 +61,8 @@ module AeEasy
       def save_errors
         errors[:errored_items].each do |errored_item|
           remove_threshold_failures(errored_item) if fields_to_ignore.any?
-          errored_item[:failures].each do |failure|
-            key = "#{failure.keys.first.to_s}_#{failure.values.first.to_s}"
+          errored_item[:failures].each do |error_key, value|
+            key = "#{error_key.to_s}_#{value.to_s}"
             summary[key] += 1
           end
           errored_item['_collection'] = collection_name
@@ -71,8 +71,8 @@ module AeEasy
       end
 
       def remove_threshold_failures(errored_item)
-        errored_item[:failures].delete_if{|failure_h|
-          field_name = extract_field(failure_h.keys.first)
+        errored_item[:failures].delete_if{|error_name, fail|
+          field_name = extract_field(error_name)
           fields_to_ignore.include?(field_name)
         }
       end
