@@ -57,7 +57,7 @@ module AeEasy
       end
 
       def total_records(collection_name)
-        collection_counts.find{|collection_hash| collection_hash['collection'] == collection_name }['count']
+        collection_counts.find{|collection_hash| collection_hash['collection'] == collection_name }['outputs']
       end
 
       def collection_counts
@@ -82,7 +82,7 @@ module AeEasy
           ValidateGroups.new(data, collection_name, errors).run
           ValidateRules.new(data, errors, rules).run if rules
         end
-        SaveOutput.new(data, rules, errors, outputs_collection_name, outputs).run
+        SaveOutput.new(data.count, rules, errors, outputs_collection_name, outputs).run
       end
 
       private
