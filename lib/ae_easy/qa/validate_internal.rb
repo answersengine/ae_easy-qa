@@ -32,8 +32,9 @@ module AeEasy
       end
 
       def run
+        output_scraper
         if status_ok?
-          validate_collections
+          validate_collections if collections && collections.any?
         else
           output_response
           return nil
@@ -41,6 +42,10 @@ module AeEasy
       end
 
       private
+
+      def output_scraper
+        puts "Validating scraper: #{scraper_name}"
+      end
 
       def status_ok?
         collection_counts.code == 200
@@ -78,6 +83,7 @@ module AeEasy
       end
 
       def run
+        output_collection
         if data.any?
           ValidateGroups.new(data, collection_name, errors).run
           ValidateRules.new(data, errors, rules).run if rules
@@ -86,6 +92,10 @@ module AeEasy
       end
 
       private
+
+      def output_collection
+        puts "Validating collection: #{collection_name}"
+      end
 
       def outputs_collection_name
         @outputs_collection_name ||= "#{scraper_name}_#{collection_name}"
