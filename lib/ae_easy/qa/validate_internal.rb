@@ -85,7 +85,7 @@ module AeEasy
       def run
         output_collection
         if data.any?
-          ValidateGroups.new(data, collection_name, errors).run
+          ValidateGroups.new(data, scraper_name, collection_name, errors).run
           ValidateRules.new(data, errors, rules).run if rules
         end
         SaveOutput.new(data.count, rules, errors, outputs_collection_name, outputs).run

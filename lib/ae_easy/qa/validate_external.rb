@@ -14,7 +14,7 @@ module AeEasy
       def run
         begin
           if data.any?
-            ValidateGroups.new(data, collection_name, errors).run
+            ValidateGroups.new(data, nil, collection_name, errors).run
             ValidateRules.new(data, errors, rules).run if rules
           end
           SaveOutput.new(data.count, rules, errors, collection_name, outputs).run
