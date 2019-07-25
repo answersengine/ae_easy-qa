@@ -107,8 +107,14 @@ module AeEasy
                     page = 1
                     while data.count < total_records
                       records = AnswersEngine::Client::ScraperJobOutput.new(per_page:500, page: page).all(scraper_name, collection_name).parsed_response
-                      records.each do |record|
-                        data << record
+                      sleep 1
+                      if records
+                        records.each do |record|
+                          data << record
+                        end
+                      else
+                        puts "All ScraperJobOutput request was nil. Total records: #{total_records}, data count: #{data.count}, page: #{page}"
+                        break
                       end
                       page += 1
                     end
