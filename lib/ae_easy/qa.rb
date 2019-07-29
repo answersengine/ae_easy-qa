@@ -14,10 +14,11 @@ module AeEasy
   module Qa
     class Validator
       attr_accessor :config
-      attr_reader :data, :errors
+      attr_reader :data, :options, :errors
 
       def initialize(data=nil, options={})
         load_config
+        @options = options
         @data = data
       end
 
@@ -26,7 +27,7 @@ module AeEasy
       end
 
       def validate_external(outputs, collection_name)
-        ValidateExternal.new(data, config, outputs, collection_name).run
+        ValidateExternal.new(data, config, outputs, collection_name, options).run
       end
 
       private

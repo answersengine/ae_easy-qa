@@ -88,7 +88,7 @@ module AeEasy
           ValidateGroups.new(data, scraper_name, collection_name, errors).run
           ValidateRules.new(data, errors, rules).run if rules
         end
-        SaveOutput.new(data.count, rules, errors, outputs_collection_name, outputs).run
+        SaveOutput.new(data.count, rules, errors, outputs_collection_name, outputs, {}).run
       end
 
       private
