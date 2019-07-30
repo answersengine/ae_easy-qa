@@ -20,7 +20,7 @@ module AeEasy
 
       def run
         gather_threshold_totals
-        gather_fields_to_ignore
+        gather_validations_to_ignore
         save_group_errors
         save_errors
         save_summary
@@ -32,53 +32,69 @@ module AeEasy
         rules.each{|field_to_validate, field_options|
           field_threshold = return_threshold(field_to_validate, field_options)
           if field_threshold
-            error_total = errors[:errored_items].inject(0){|total, errored_item|
-              failed_fields = errored_item[:failures].keys.collect{|failure_key|
-                extract_field(failure_key)
-              }.uniq
-              total += 1 if failed_fields.include?(field_to_validate)
-              total
-            }
-            error_totals[field_to_validate] = error_total
+            gather_field_threshold_totals(field_to_validate, field_options)
           else
-            field_options.each do |validation|
-              potential_failure_name = "#{field_to_validate}_#{validation[0]}_fail"
-              if options['thresholds'][potential_failure_name]
-                error_total = errors[:errored_items].inject(0){|total, errored_item|
-                  failed_validations = errored_item[:failures].keys.collect{|failure_key|
-                    "#{failure_key}_fail"
-                  }
-                  total += 1 if failed_validations.include?(potential_failure_name)
-                  total
-                }
-                error_totals[potential_failure_name] = error_total
-              end
-            end
+            gather_specific_validation_totals(field_to_validate, field_options)
           end
         }
       end
 
-      def gather_fields_to_ignore
+      def gather_field_threshold_totals(field_to_validate, field_options)
+        error_total = errors[:errored_items].inject(0){|total, errored_item|
+          failed_fields = errored_item[:failures].keys.collect{|failure_key|
+            extract_field(failure_key)
+          }.uniq
+          total += 1 if failed_fields.include?(field_to_validate)
+          total
+        }
+        error_totals[field_to_validate] = error_total
+      end
+
+      def gather_specific_validation_totals(field_to_validate, field_options)
+        field_options.each do |validation|
+          potential_failure_name = "#{field_to_validate}_#{validation[0]}_fail"
+          if options['thresholds'][potential_failure_name]
+            error_total = errors[:errored_items].inject(0){|total, errored_item|
+              failed_validations = errored_item[:failures].keys.collect{|failure_key|
+                "#{failure_key}_fail"
+              }
+              total += 1 if failed_validations.include?(potential_failure_name)
+              total
+            }
+            error_totals[potential_failure_name] = error_total
+          end
+        end
+      end
+
+      def gather_validations_to_ignore
         rules.each{|field_to_validate, field_options|
           field_threshold = return_threshold(field_to_validate, field_options)
           if field_threshold
-            total_errors = error_totals[field_to_validate]
-            if total_errors
-              success_ratio = (total_items - total_errors).to_f / total_items
-              fields_to_ignore.push(field_to_validate) if success_ratio > field_threshold
-            end
+            gather_fields_to_ignore(field_to_validate)
           else
-            field_options.each do |validation|
-              potential_failure_name = "#{field_to_validate}_#{validation[0]}_fail"
-              total_errors = error_totals[potential_failure_name]
-              if total_errors
-                specific_validation_threshold = options['thresholds'][potential_failure_name].to_f
-                success_ratio = (total_items - total_errors).to_f / total_items
-                specific_validations_to_ignore.push(potential_failure_name) if success_ratio > specific_validation_threshold
-              end
-            end
+            gather_specific_validations_to_ignore(field_to_validate, field_options)
           end
         }
+      end
+
+      def gather_fields_to_ignore(field_to_validate)
+        total_errors = error_totals[field_to_validate]
+        if total_errors
+          success_ratio = (total_items - total_errors).to_f / total_items
+          fields_to_ignore.push(field_to_validate) if success_ratio > field_threshold
+        end
+      end
+
+      def gather_specific_validations_to_ignore(field_to_validate, field_options)
+        field_options.each do |validation|
+          potential_failure_name = "#{field_to_validate}_#{validation[0]}_fail"
+          total_errors = error_totals[potential_failure_name]
+          if total_errors
+            specific_validation_threshold = options['thresholds'][potential_failure_name].to_f
+            success_ratio = (total_items - total_errors).to_f / total_items
+            specific_validations_to_ignore.push(potential_failure_name) if success_ratio > specific_validation_threshold
+          end
+        end
       end
 
       def return_threshold(field_to_validate, field_options)
