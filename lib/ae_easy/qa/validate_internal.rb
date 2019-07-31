@@ -12,23 +12,38 @@ module AeEasy
       def run
         begin
           scrapers.each do |scraper_name, collections|
-            ValidateScraper.new(scraper_name, collections, rules, outputs).run
+            ValidateScraper.new(scraper_name, collections, rules, outputs, thresholds).run
           end
         rescue StandardError => e
           puts "An error has occurred: #{e}"
           return nil
         end
       end
+
+      private
+
+      def thresholds
+        @thresholds ||= begin
+                          file_path = File.expand_path('thresholds.yaml', Dir.pwd)
+                          if File.exists? file_path
+                            YAML.load(File.open(file_path))
+                          else
+                            nil
+                          end
+                        end
+      end
     end
 
     class ValidateScraper
-      attr_reader :scraper_name, :collections, :rules, :outputs
+      attr_reader :scraper_name, :collections, :rules, :outputs, :options
 
-      def initialize(scraper_name, collections, rules, outputs)
+      def initialize(scraper_name, collections, rules, outputs, thresholds)
         @scraper_name = scraper_name
         @collections = collections
         @rules = rules
         @outputs = outputs
+        @options = {}
+        options['thresholds'] = thresholds[scraper_name] if thresholds && thresholds[scraper_name]
       end
 
       def run
@@ -44,41 +59,51 @@ module AeEasy
       private
 
       def output_scraper
-        puts "Validating scraper: #{scraper_name}"
+        puts "validating scraper: #{scraper_name}"
       end
 
       def status_ok?
-        collection_counts.code == 200
+        !collection_response.parsed_response.nil? && collection_response.code == 200
       end
 
       def validate_collections
         collections.each do |collection_name|
-          ValidateCollection.new(scraper_name, collection_name, total_records(collection_name), rules, outputs).run
+          collection = collection_counts.find{|collection_hash| collection_hash['collection'] == collection_name }
+          if collection
+            ValidateCollection.new(scraper_name, collection_name, collection['outputs'], rules, outputs, options).run
+          else
+            puts "collection #{collection_name} is missing"
+          end
         end
       end
 
       def output_response
-        puts collection_counts.parsed_response['message']
-      end
-
-      def total_records(collection_name)
-        collection_counts.find{|collection_hash| collection_hash['collection'] == collection_name }['outputs']
+        if collection_response.parsed_response.nil?
+          puts "collection response is null"
+        else
+          puts collection_response.parsed_response['message']
+        end
       end
 
       def collection_counts
-        @collection_counts ||= AnswersEngine::Client::ScraperJobOutput.new.collections(scraper_name)
+        @collection_counts ||= collection_response.parsed_response
+      end
+
+      def collection_response
+        @collection_response || AnswersEngine::Client::ScraperJobOutput.new.collections(scraper_name)
       end
     end
 
     class ValidateCollection
-      attr_reader :scraper_name, :collection_name, :total_records, :rules, :errors, :outputs
+      attr_reader :scraper_name, :collection_name, :total_records, :rules, :errors, :outputs, :options
 
-      def initialize(scraper_name, collection_name, total_records, rules, outputs)
+      def initialize(scraper_name, collection_name, total_records, rules, outputs, options)
         @scraper_name = scraper_name
         @collection_name = collection_name
         @total_records = total_records
         @rules = rules
         @outputs = outputs
+        @options = options
         @errors = { errored_items: [] }
       end
 
@@ -88,7 +113,7 @@ module AeEasy
           ValidateGroups.new(data, scraper_name, collection_name, errors).run
           ValidateRules.new(data, errors, rules).run if rules
         end
-        SaveOutput.new(data.count, rules, errors, outputs_collection_name, outputs, {}).run
+        SaveOutput.new(data.count, rules, errors, outputs_collection_name, outputs, options).run
       end
 
       private

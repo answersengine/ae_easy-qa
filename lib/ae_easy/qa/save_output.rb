@@ -53,7 +53,7 @@ module AeEasy
       def gather_specific_validation_totals(field_to_validate, field_options)
         field_options.each do |validation|
           potential_failure_name = "#{field_to_validate}_#{validation[0]}_fail"
-          if options['thresholds'][potential_failure_name]
+          if options['thresholds'] && options['thresholds'][potential_failure_name]
             error_total = errors[:errored_items].inject(0){|total, errored_item|
               failed_validations = errored_item[:failures].keys.collect{|failure_key|
                 "#{failure_key}_fail"
@@ -70,18 +70,21 @@ module AeEasy
         rules.each{|field_to_validate, field_options|
           field_threshold = return_threshold(field_to_validate, field_options)
           if field_threshold
-            gather_fields_to_ignore(field_to_validate)
+            gather_fields_to_ignore(field_to_validate, field_threshold)
           else
             gather_specific_validations_to_ignore(field_to_validate, field_options)
           end
         }
       end
 
-      def gather_fields_to_ignore(field_to_validate)
+      def gather_fields_to_ignore(field_to_validate, field_threshold)
         total_errors = error_totals[field_to_validate]
         if total_errors
           success_ratio = (total_items - total_errors).to_f / total_items
-          fields_to_ignore.push(field_to_validate) if success_ratio > field_threshold
+          if success_ratio > field_threshold.to_f
+            puts "Ignoring #{field_to_validate}"
+            fields_to_ignore.push(field_to_validate)
+          end
         end
       end
 
@@ -92,7 +95,10 @@ module AeEasy
           if total_errors
             specific_validation_threshold = options['thresholds'][potential_failure_name].to_f
             success_ratio = (total_items - total_errors).to_f / total_items
-            specific_validations_to_ignore.push(potential_failure_name) if success_ratio > specific_validation_threshold
+            if success_ratio > specific_validation_threshold
+              puts "Ignoring #{potential_failure_name}"
+              specific_validations_to_ignore.push(potential_failure_name)
+            end
           end
         end
       end
