@@ -47,11 +47,16 @@ module AeEasy
       end
 
       def run
-        output_scraper
-        if status_ok?
-          validate_collections if collections && collections.any?
-        else
-          output_response
+        begin
+          output_scraper
+          if status_ok?
+            validate_collections if collections && collections.any?
+          else
+            output_response
+            return nil
+          end
+        rescue StandardError => e
+          puts "An error has occurred for the scraper named '#{scraper_name}': #{e}"
           return nil
         end
       end
