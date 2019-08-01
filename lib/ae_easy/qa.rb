@@ -22,8 +22,8 @@ module AeEasy
         @data = data
       end
 
-      def validate_internal(outputs)
-        ValidateInternal.new(config, outputs).run
+      def validate_internal(vars, outputs)
+        ValidateInternal.new(vars, config, outputs).run
       end
 
       def validate_external(outputs, collection_name)

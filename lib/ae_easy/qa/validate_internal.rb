@@ -1,19 +1,18 @@
 module AeEasy
   module Qa
     class ValidateInternal
-      attr_reader :scrapers, :rules, :outputs
+      attr_reader :scraper_name, :collections, :rules, :outputs
 
-      def initialize(config, outputs)
-        @scrapers = config['scrapers']
+      def initialize(vars, config, outputs)
+        @scraper_name = vars['scraper_name']
+        @collections = vars['collections']
         @rules = config['individual_validations']
         @outputs = outputs
       end
 
       def run
         begin
-          scrapers.each do |scraper_name, collections|
-            ValidateScraper.new(scraper_name, collections, rules, outputs, thresholds).run
-          end
+          ValidateScraper.new(scraper_name, collections, rules, outputs, thresholds).run
         rescue StandardError => e
           puts "An error has occurred: #{e}"
           return nil
