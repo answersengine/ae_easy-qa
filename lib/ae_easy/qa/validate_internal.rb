@@ -114,11 +114,16 @@ module AeEasy
 
       def run
         output_collection
-        if data.any?
-          ValidateGroups.new(data, scraper_name, collection_name, errors).run
-          ValidateRules.new(data, errors, rules).run if rules
+        if most_recent_finished_job
+          puts "data count #{data.count}"
+          if data.any?
+            ValidateGroups.new(data, scraper_name, collection_name, errors).run
+            ValidateRules.new(data, errors, rules).run if rules
+          end
+          SaveOutput.new(data.count, rules, errors, outputs_collection_name, outputs, options).run
+        else
+          puts "No job with status 'done' available"
         end
-        SaveOutput.new(data.count, rules, errors, outputs_collection_name, outputs, options).run
       end
 
       private
@@ -127,8 +132,15 @@ module AeEasy
         puts "Validating collection: #{collection_name}"
       end
 
-      def outputs_collection_name
-        @outputs_collection_name ||= "#{scraper_name}_#{collection_name}"
+      def most_recent_finished_job
+        @most_recent_finished_job ||= begin
+                                        jobs_response = AnswersEngine::Client::ScraperJob.new.all(scraper_name)
+                                        if jobs_response.code == 200
+                                          jobs_response.parsed_response.sort_by { |job| job['created_at'] }.reverse.find{|job| job['status'] == 'done' }
+                                        else
+                                          nil
+                                        end
+                                      end
       end
 
       def data
@@ -136,7 +148,7 @@ module AeEasy
                     data = []
                     page = 1
                     while data.count < total_records
-                      records = AnswersEngine::Client::ScraperJobOutput.new(per_page:500, page: page).all(scraper_name, collection_name).parsed_response
+                      records = AnswersEngine::Client::JobOutput.new(per_page:500, page: page).all(most_recent_finished_job['id'], collection_name).parsed_response
                       sleep 1
                       if records
                         records.each do |record|
@@ -150,6 +162,10 @@ module AeEasy
                     end
                     data
                   end
+      end
+
+      def outputs_collection_name
+        @outputs_collection_name ||= "#{scraper_name}_#{collection_name}"
       end
     end
   end
