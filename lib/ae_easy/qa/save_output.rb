@@ -95,7 +95,7 @@ module AeEasy
           if total_errors
             specific_validation_threshold = options['thresholds'][potential_failure_name].to_f
             success_ratio = (total_items - total_errors).to_f / total_items
-            if success_ratio > specific_validation_threshold
+            if success_ratio > specific_validation_threshold || (specific_validation_threshold == 0.0 && success_ratio == 0.0)
               puts "Ignoring #{potential_failure_name}"
               specific_validations_to_ignore.push(potential_failure_name)
             end
