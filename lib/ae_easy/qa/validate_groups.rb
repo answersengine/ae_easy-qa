@@ -11,6 +11,7 @@ module AeEasy
       end
 
       def run
+        puts "Running Group Validations"
         if group_validations_present?
           load_module
           include_module

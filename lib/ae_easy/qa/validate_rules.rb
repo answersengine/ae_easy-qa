@@ -13,6 +13,7 @@ module AeEasy
       end
 
       def run
+        puts "Validating Rules"
         handle_rules
       end
 
