@@ -30,7 +30,15 @@ describe AeEasy::Qa::Validator do
     it 'should test value equal with if condition' do
       data = [{'input' => 'Search', 'type' => 'A'}, {'input' => 'Search1', 'type' => 'A'}, {'input' => 'Search1', 'type' => 'B'}]
       qa = AeEasy::Qa::Validator.new(data)
-      qa.config = {"individual_validations"=>{"input"=>{"value"=>{"equal"=>"Search", "if"=>{"type"=>{"value"=>"A"}}},"required"=>true}}}
+      qa.config = {"individual_validations"=>{"input"=>{"value"=>{"equal"=>"Search", "if"=>{"type"=>{"value"=>{"equal"=>"A"}}}},"required"=>true}}}
+      results = qa.validate_external([], 'test')
+      assert_equal results, {:errored_items=>[{:failures=>{:input_value=>"fail"}, :item=>{"input"=>"Search1", "type"=>"A"}, "_collection"=>"test"}]}
+    end
+
+    it 'should test value equal with if regex condition' do
+      data = [{'input' => 'Search', 'type' => 'A'}, {'input' => 'Search1', 'type' => 'A'}, {'input' => 'Search1', 'type' => '123'}]
+      qa = AeEasy::Qa::Validator.new(data)
+      qa.config = {"individual_validations"=>{"input"=>{"value"=>{"equal"=>"Search", "if"=>{"type"=>{"value"=>{"regex"=>"[A-Z]"}}}},"required"=>true}}}
       results = qa.validate_external([], 'test')
       assert_equal results, {:errored_items=>[{:failures=>{:input_value=>"fail"}, :item=>{"input"=>"Search1", "type"=>"A"}, "_collection"=>"test"}]}
     end
@@ -38,7 +46,7 @@ describe AeEasy::Qa::Validator do
     it 'should test value less than with if condition' do
       data = [{'input' => 4, 'type' => 'A'}, {'input' => 6, 'type' => 'A'}, {'input' => 10, 'type' => 'B'}]
       qa = AeEasy::Qa::Validator.new(data)
-      qa.config = {"individual_validations"=>{"input"=>{"value"=>{"less_than"=>5, "if"=>{"type"=>{"value"=>"A"}}}, "required"=>true}}}
+      qa.config = {"individual_validations"=>{"input"=>{"value"=>{"less_than"=>5, "if"=>{"type"=>{"value"=>{"equal"=>"A"}}}}, "required"=>true}}}
       results = qa.validate_external([], 'test')
       assert_equal results, {:errored_items=>[{:failures=>{:input_value=>"fail"}, :item=>{"input"=>6, "type"=>"A"}, "_collection"=>"test"}]}
     end
@@ -46,7 +54,7 @@ describe AeEasy::Qa::Validator do
     it 'should test value more than with if condition' do
       data = [{'input' => 4, 'type' => 'A'}, {'input' => 6, 'type' => 'A'}, {'input' => 10, 'type' => 'B'}]
       qa = AeEasy::Qa::Validator.new(data)
-      qa.config = {"individual_validations"=>{"input"=>{"value"=>{"greater_than"=>5, "if"=>{"type"=>{"value"=>"A"}}}, "required"=>true}}}
+      qa.config = {"individual_validations"=>{"input"=>{"value"=>{"greater_than"=>5, "if"=>{"type"=>{"value"=>{"equal"=>"A"}}}}, "required"=>true}}}
       results = qa.validate_external([], 'test')
       assert_equal results, {:errored_items=>[{:failures=>{:input_value=>"fail"}, :item=>{"input"=>4, "type"=>"A"}, "_collection"=>"test"}]}
     end
@@ -62,7 +70,7 @@ describe AeEasy::Qa::Validator do
     it 'should test comparison of multiple values with if condition' do
       data = [{'input' => 4, 'type' => 'A'}, {'input' => 6, 'type' => 'C'}, {'input' => 10, 'type' => 'B'}, {'input' => 10, 'type' => 'C'}]
       qa = AeEasy::Qa::Validator.new(data)
-      qa.config = {"individual_validations"=>{"input"=>{"value"=>{"equal"=>{"or"=>[4,6]}, "if"=>{"type"=>{"value"=>"C"}}}, "required"=>true}}}
+      qa.config = {"individual_validations"=>{"input"=>{"value"=>{"equal"=>{"or"=>[4,6]}, "if"=>{"type"=>{"value"=>{"equal"=>"C"}}}}, "required"=>true}}}
       results = qa.validate_external([], 'test')
       assert_equal results, {:errored_items=>[{:failures=>{:input_value=>"fail"}, :item=>{"input"=>10, "type"=>"C"}, "_collection"=>"test"}]}
     end

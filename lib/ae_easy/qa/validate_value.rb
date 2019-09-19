@@ -27,8 +27,17 @@ module AeEasy
         condition_hash = params['if'][field_name]
         case condition_hash.keys.first
         when 'value'
-          if(data_hash[field_name] == condition_hash.values.first)
-            main_value_check
+          value_hash = condition_hash['value'] #Ex: {"equal"=>"A"}
+          if value_hash['equal']
+            main_value_check if data_hash[field_name] == value_hash['equal']
+          elsif value_hash['regex']
+            main_value_check if data_hash[field_name].to_s =~ Regexp.new(value_hash['regex'], true)
+          elsif params['less_than']
+            main_value_check if data_hash[field_name] < value_hash['less_than']
+          elsif params['greater_than']
+            main_value_check if data_hash[field_name] > value_hash['greater_than']
+          else
+            raise StandardError.new("The if condition '#{value_hash}' is unknown.")
           end
         end
       end
