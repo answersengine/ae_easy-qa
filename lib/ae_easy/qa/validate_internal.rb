@@ -135,7 +135,7 @@ module AeEasy
         @most_recent_finished_job ||= begin
                                         jobs_response = AnswersEngine::Client::ScraperJob.new.all(scraper_name)
                                         if jobs_response.code == 200
-                                          jobs_response.parsed_response.sort_by { |job| job['created_at'] }.reverse.find{|job| job['status'] == 'done' }
+                                          jobs_response.parsed_response.sort_by { |job| job['created_at'] }.reverse.find{|job| job['status'] == 'active' || job['status'] == 'done' }
                                         else
                                           nil
                                         end
