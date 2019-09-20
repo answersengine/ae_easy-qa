@@ -74,5 +74,21 @@ describe AeEasy::Qa::Validator do
       results = qa.validate_external([], 'test')
       assert_equal results, {:errored_items=>[{:failures=>{:input_value=>"fail"}, :item=>{"input"=>10, "type"=>"C"}, "_collection"=>"test"}]}
     end
+
+    it 'should test regex with a regex if statement' do
+      data = [{'input' => 4, 'type' => 'a'}, {'input' => 6, 'type' => '99'}, {'input' => 10, 'type' => '99'}]
+      qa = AeEasy::Qa::Validator.new(data)
+      qa.config = {"individual_validations"=>{"input"=>{"value"=>{"regex"=>"[A-Z]", "if"=>{"type"=>{"value"=>{"regex"=>"[A-Z]"}}}}, "required"=>true}}}
+      results = qa.validate_external([], 'test')
+      assert_equal results, {:errored_items=>[{:failures=>{:input_value=>"fail"}, :item=>{"input"=>4, "type"=>"a"}, "_collection"=>"test"}]}
+    end
+
+    it 'should test required with an if statement' do
+      data = [{'input' => '', 'type' => 'a'}, {'input' => '', 'type' => '99'}, {'input' => 10, 'type' => '99'}]
+      qa = AeEasy::Qa::Validator.new(data)
+      qa.config = {"individual_validations"=>{"input"=>{"required"=>true, "if"=>{"type"=>{"value"=>{"regex"=>"[0-9]"}}}}}}
+      results = qa.validate_external([], 'test')
+      assert_equal results, {:errored_items=>[{:failures=>{:input_required=>"fail"}, :item=>{"input"=>"", "type"=>"99"}, "_collection"=>"test"}]}
+    end
   end
 end

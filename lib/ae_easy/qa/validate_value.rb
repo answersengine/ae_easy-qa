@@ -13,33 +13,17 @@ module AeEasy
       end
 
       def run
-        condition_exists? ? handle_conditions : main_value_check
+        if_exists? ? handle_if : main_value_check
       end
 
       private
 
-      def condition_exists?
+      def if_exists?
         !params['if'].nil?
       end
 
-      def handle_conditions
-        field_name = params['if'].keys.first
-        condition_hash = params['if'][field_name]
-        case condition_hash.keys.first
-        when 'value'
-          value_hash = condition_hash['value'] #Ex: {"equal"=>"A"}
-          if value_hash['equal']
-            main_value_check if data_hash[field_name] == value_hash['equal']
-          elsif value_hash['regex']
-            main_value_check if data_hash[field_name].to_s =~ Regexp.new(value_hash['regex'], true)
-          elsif params['less_than']
-            main_value_check if data_hash[field_name] < value_hash['less_than']
-          elsif params['greater_than']
-            main_value_check if data_hash[field_name] > value_hash['greater_than']
-          else
-            raise StandardError.new("The if condition '#{value_hash}' is unknown.")
-          end
-        end
+      def handle_if
+        main_value_check if pass_if?(params['if'], data_hash)
       end
 
       def main_value_check

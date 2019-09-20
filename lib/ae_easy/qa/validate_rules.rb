@@ -27,12 +27,12 @@ module AeEasy
               options.each{|validation, value|
                 case validation
                 when 'type'
-                  ValidateType.new(data_hash, field_to_validate, value, rules, errored_item).run if options['required']
+                  ValidateType.new(data_hash, field_to_validate, value, rules, errored_item).run
                 when 'value'
-                  ValidateValue.new(data_hash, field_to_validate, value, errored_item).run if options['required']
+                  ValidateValue.new(data_hash, field_to_validate, value, errored_item).run
                 when 'length'
-                  validate_length(data_hash, field_to_validate, value) if options['required']
-                when /required|threshold/
+                  validate_length(data_hash, field_to_validate, value)
+                when /required|threshold|if/
                   nil
                 else
                   unknown_validation_error(validation) if validation !~ /format/
@@ -46,8 +46,17 @@ module AeEasy
 
       def passes_required_check?(options, data_hash, field_to_validate)
         if options['required'] == true && fails_required_check?(data_hash, field_to_validate)
-          add_errored_item(data_hash, field_to_validate, 'required')
-          false
+          if options['if']
+            if pass_if?(options['if'], data_hash)
+              add_errored_item(data_hash, field_to_validate, 'required')
+              false
+            else
+              true
+            end
+          else
+            add_errored_item(data_hash, field_to_validate, 'required')
+            false
+          end
         else
           true
         end
