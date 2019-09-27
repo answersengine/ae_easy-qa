@@ -36,9 +36,9 @@ module AeEasy
         elsif params['regex']
           add_errored_item(data_hash, field_to_validate, 'value') if (data_hash[field_to_validate].to_s !~ Regexp.new(params['regex'], true))
         elsif params['less_than']
-          add_errored_item(data_hash, field_to_validate, 'value') if !(data_hash[field_to_validate] < params['less_than'])
+          add_errored_item(data_hash, field_to_validate, 'value') if !(data_hash[field_to_validate].to_i < params['less_than'].to_i)
         elsif params['greater_than']
-          add_errored_item(data_hash, field_to_validate, 'value') if !(data_hash[field_to_validate] > params['greater_than'])
+          add_errored_item(data_hash, field_to_validate, 'value') if !(data_hash[field_to_validate].to_i > params['greater_than'].to_i)
         else
           unknown_value_error
         end

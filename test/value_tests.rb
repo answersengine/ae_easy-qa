@@ -90,5 +90,21 @@ describe AeEasy::Qa::Validator do
       results = qa.validate_external([], 'test')
       assert_equal results, {:errored_items=>[{:failures=>{:input_required=>"fail"}, :item=>{"input"=>"", "type"=>"99"}, "_collection"=>"test"}]}
     end
+
+    it 'should test required with an if statement that has multiple and conditions' do
+      data = [{'input' => '', 'type' => 'a', 'key1' => '6'}, {'input' => '', 'type' => '99', 'key1' => '20'}, {'input' => '', 'type' => '99', 'key1' => '5'}, {'input' => 10, 'type' => '99', 'key1' => '1'}]
+      qa = AeEasy::Qa::Validator.new(data)
+      qa.config = {"individual_validations"=>{"input"=>{"required"=>true, "if"=>{"and"=>[{"type"=>{"value"=>{"regex"=>"[0-9]"}}},{"key1"=>{"value"=>{"greater_than"=>"10"}}}]}}}}
+      results = qa.validate_external([], 'test')
+      assert_equal results, {:errored_items=>[{:failures=>{:input_required=>"fail"}, :item=>{"input"=>"", "type"=>"99", "key1"=>"20"}, "_collection"=>"test"}]}
+    end
+
+    it 'should test required with an if statement that has multiple or conditions' do
+      data = [{'input' => '', 'type' => 'a', 'key1' => '6'}, {'input' => '', 'type' => 'b', 'key1' => '20'}, {'input' => '', 'type' => '99', 'key1' => '5'}, {'input' => '', 'type' => 'blah', 'key1' => '1'}]
+      qa = AeEasy::Qa::Validator.new(data)
+      qa.config = {"individual_validations"=>{"input"=>{"required"=>true, "if"=>{"or"=>[{"type"=>{"value"=>{"regex"=>"[0-9]"}}},{"key1"=>{"value"=>{"less_than"=>"5"}}}]}}}}
+      results = qa.validate_external([], 'test')
+      assert_equal results, {:errored_items=>[{:failures=>{:input_required=>"fail"}, :item=>{"input"=>"", "type"=>"99", "key1"=>"5"}, "_collection"=>"test"}, {:failures=>{:input_required=>"fail"}, :item=>{"input"=>"", "type"=>"blah", "key1"=>"1"}, "_collection"=>"test"}]}
+    end
   end
 end
