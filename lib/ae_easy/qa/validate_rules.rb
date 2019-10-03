@@ -45,18 +45,25 @@ module AeEasy
       end
 
       def passes_required_check?(options, data_hash, field_to_validate)
-        if options['required'] == true && fails_required_check?(data_hash, field_to_validate)
+        if options['required'] == true
           if options['if']
             if pass_if?(options['if'], data_hash)
-              add_errored_item(data_hash, field_to_validate, 'required')
-              false
+              check_for_required_failure(data_hash, field_to_validate)
             else
-              true
+              false
             end
           else
-            add_errored_item(data_hash, field_to_validate, 'required')
-            false
+            check_for_required_failure(data_hash, field_to_validate)
           end
+        else
+          false
+        end
+      end
+
+      def check_for_required_failure(data_hash, field_to_validate)
+        if fails_required_check?(data_hash, field_to_validate)
+          add_errored_item(data_hash, field_to_validate, 'required')
+          false
         else
           true
         end
