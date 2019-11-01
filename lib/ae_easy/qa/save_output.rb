@@ -28,6 +28,7 @@ module AeEasy
 
       private
 
+      #thresholds are a setting where you can ignore errors if they are under a specific error rate
       def gather_threshold_totals
         rules.each{|field_to_validate, field_options|
           field_threshold = return_threshold(field_to_validate, field_options)

@@ -22,10 +22,12 @@ module AeEasy
         @data = data
       end
 
+      #this method is for validating "internal" scrapers that run on AnswersEngine
       def validate_internal(vars, outputs)
         ValidateInternal.new(vars, config, outputs).run
       end
 
+      #this method is for validating data from "external" sources
       def validate_external(outputs, collection_name)
         ValidateExternal.new(data, config, outputs, collection_name, options).run
       end

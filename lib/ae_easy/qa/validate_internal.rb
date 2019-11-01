@@ -21,6 +21,7 @@ module AeEasy
 
       private
 
+      #thresholds are a setting where you can suppress errors if they are under a specific error rate
       def thresholds
         @thresholds ||= begin
                           file_path = File.expand_path('thresholds.yaml', Dir.pwd)
