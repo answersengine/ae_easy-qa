@@ -1,18 +1,19 @@
 module AeEasy
   module Qa
     class ValidateInternal
-      attr_reader :scraper_name, :collections, :rules, :outputs
+      attr_reader :scraper_name, :collections, :rules, :outputs, :data
 
       def initialize(vars, config, outputs)
         @scraper_name = vars['scraper_name']
         @collections = vars['collections']
         @rules = config['individual_validations']
         @outputs = outputs
+        @data = vars['data']
       end
 
       def run
         begin
-          ValidateScraper.new(scraper_name, collections, rules, outputs, thresholds).run
+          ValidateScraper.new(scraper_name, collections, rules, outputs, thresholds, data).run
         rescue StandardError => e
           puts "An error has occurred: #{e}"
           return nil
@@ -35,14 +36,15 @@ module AeEasy
     end
 
     class ValidateScraper
-      attr_reader :scraper_name, :collections, :rules, :outputs, :options
+      attr_reader :scraper_name, :collections, :rules, :outputs, :options, :data
 
-      def initialize(scraper_name, collections, rules, outputs, thresholds)
+      def initialize(scraper_name, collections, rules, outputs, thresholds, data)
         @scraper_name = scraper_name
         @collections = collections
         @rules = rules
         @outputs = outputs
         @options = {}
+        @data = data
         options['thresholds'] = thresholds[scraper_name] if thresholds && thresholds[scraper_name]
       end
 
@@ -75,7 +77,7 @@ module AeEasy
         collections.each do |collection_name|
           collection = collection_counts.find{|collection_hash| collection_hash['collection'] == collection_name }
           if collection
-            ValidateCollection.new(scraper_name, collection_name, collection['outputs'], rules, outputs, options).run
+            ValidateCollection.new(scraper_name, collection_name, collection['outputs'], rules, outputs, options.merge({'data' => @data})).run
           else
             puts "collection #{collection_name} is missing"
           end
@@ -108,6 +110,7 @@ module AeEasy
         @total_records = total_records
         @rules = rules
         @outputs = outputs
+        @data = options['data']
         @options = options
         @errors = { errored_items: [] }
       end
