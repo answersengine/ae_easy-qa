@@ -70,7 +70,7 @@ module AeEasy
       end
 
       def status_ok?
-        !collection_response.parsed_response.nil? && collection_response.code == 200
+        !old_collection_response.parsed_response.nil? && old_collection_response.code == 200
       end
 
       def validate_collections
@@ -85,19 +85,29 @@ module AeEasy
       end
 
       def output_response
-        if collection_response.parsed_response.nil?
+        if old_collection_response.parsed_response.nil?
           puts "collection response is null"
         else
-          puts collection_response.parsed_response['message']
+          puts old_collection_response.parsed_response['message']
         end
       end
 
       def collection_counts
-        @collection_counts ||= collection_response.parsed_response
+        @collection_counts ||= collection_response
       end
 
       def collection_response
-        @collection_response || AnswersEngine::Client::ScraperJobOutput.new.collections(scraper_name)
+        json = JSON.parse(AnswersEngine::Client::ScraperJobOutput.new.collections(scraper_name).body)
+        if json['error'] == ""
+          @collection_response || json["data"]
+        else 
+          puts "There was an error: #{JSON.pretty_generate(json['error'])}"
+          @collection_response
+        end
+      end
+
+      def old_collection_response
+        @old_collection_response || AnswersEngine::Client::ScraperJobOutput.new.collections(scraper_name)
       end
     end
 
@@ -151,6 +161,7 @@ module AeEasy
                     data = []
                     page = 1
                     while data.count < total_records
+                      # if there is an issue maybe due to this method response due to new stream data response AnswersEngine::Client::JobOutput.new(per_page:500, page: page).all
                       records = AnswersEngine::Client::JobOutput.new(per_page:500, page: page).all(most_recent_finished_job['id'], collection_name).parsed_response
                       sleep 1
                       if records
